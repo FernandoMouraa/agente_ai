@@ -1,5 +1,6 @@
-""" Funções de RAG: busca contextualizada, formatação de citações e extração de trechos. """
-
+"""
+Funções de RAG: busca contextualizada, formatação de citações e extração de trechos.
+"""
 import re, pathlib
 from typing import List, Dict
 
@@ -14,20 +15,13 @@ def extrair_trecho(texto: str, query: str, janela: int = 240) -> str:
     pos = -1
     for t in termos:
         pos = txt.lower().find(t)
-        if pos != -1:
-            break
-    if pos == -1:
-        pos = 0
+        if pos != -1: break
+    if pos == -1: pos = 0
     ini, fim = max(0, pos - janela//2), min(len(txt), pos + janela//2)
     return txt[ini:fim]
 
 def formatar_citacoes(docs_rel: List, query: str) -> List[Dict]:
-    """
-    Formata citações dos documentos encontrados:
-    - documento
-    - página
-    - trecho relevante
-    """
+    """Formata citações dos documentos encontrados."""
     cites, seen = [], set()
     for d in docs_rel:
         src = pathlib.Path(d.metadata.get("source","")).name
@@ -36,9 +30,18 @@ def formatar_citacoes(docs_rel: List, query: str) -> List[Dict]:
         if key in seen:
             continue
         seen.add(key)
-        cites.append({
-            "documento": src,
-            "pagina": page,
-            "trecho": extrair_trecho(d.page_content, query)
-        })
+        cites.append({"documento": src, "pagina": page, "trecho": extrair_trecho(d.page_content, query)})
     return cites[:3]
+
+def perguntar_politica_RAG(pergunta: str, retriever, document_chain) -> Dict:
+    """Função para responder perguntas usando RAG."""
+    docs_relacionados = retriever.invoke(pergunta)
+    if not docs_relacionados:
+        return {"answer": "Não sei.", "citacoes": [], "contexto_encontrado": False}
+
+    answer = document_chain.invoke({"input": pergunta, "context": docs_relacionados})
+    txt = (answer or "").strip()
+    if txt.rstrip(".!?") == "Não sei":
+        return {"answer": "Não sei.", "citacoes": [], "contexto_encontrado": False}
+
+    return {"answer": txt, "citacoes": formatar_citacoes(docs_relacionados, pergunta), "contexto_encontrado": True}
