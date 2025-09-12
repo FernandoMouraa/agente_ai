@@ -1,20 +1,26 @@
-# Nome do Projeto
+# Fernando AI - Assistente de Políticas Internas
 
-Descrição breve do projeto.
+Projeto em Python para triagem de mensagens de Service Desk e busca contextualizada (RAG) em PDFs de políticas internas.
 
-## Funcionalidades
-- Funcionalidade 1
-- Funcionalidade 2
-- Funcionalidade 3
+## Estrutura
 
-## Instalação
+- `config.py`: Variáveis de ambiente e prompts fixos.
+- `models.py`: Modelos Pydantic e LLMs.
+- `triagem.py`: Função de triagem de mensagens.
+- `loader_rag.py`: Carregamento de PDFs e criação do retriever FAISS.
+- `rag.py`: Funções de RAG, formatação de citações.
+- `main.py`: Execução e testes.
+- `docs/`: PDFs de políticas internas (coloque aqui seus arquivos).
+- `.env`: Arquivo com `GEMINI_API_KEY=<sua_chave>`.
+
+## Requisitos
+
+- Python >= 3.10
+- Instalar dependências:
 ```bash
+pip install -r requirements.txt
+
 # Clone o repositório
 https://github.com/FernandoMouraa/agente_ai.git
 
-# Entre na pasta do projeto
-cd seu-projeto
-
-# Instale as dependências
-npm install
 
