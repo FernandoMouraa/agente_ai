@@ -5,49 +5,76 @@ from rag import perguntar_politica_RAG
 from langchain_core.prompts import ChatPromptTemplate
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from triagem import llm_triagem
-
+from workflow import grafo
 # ----------------------------
 # Triagem - exemplos
 # ----------------------------
-testes_triagem = ["Posso reembolsar a internet?",
-                  "Quero mais 5 dias de trabalho remoto. Como faço?",
-                  "Posso reembolsar cursos ou treinamentos da Alura?",
-                  "Quantas capivaras tem no Rio Pinheiros?"]
+# testes_triagem = ["Posso reembolsar a internet?",
+#                   "Quero mais 5 dias de trabalho remoto. Como faço?",
+#                   "Posso reembolsar cursos ou treinamentos da Alura?",
+#                   "Quantas capivaras tem no Rio Pinheiros?"]
 
-for msg in testes_triagem:
-    print(f"Pergunta: {msg}\n -> Resposta: {triagem(msg)}\n")
+# for msg in testes_triagem:
+#     print(f"Pergunta: {msg}\n -> Resposta: {triagem(msg)}\n")
+
+# # ----------------------------
+# # RAG - inicialização
+# # ----------------------------
+# docs = carregar_docs("docs/")
+# chunks = gerar_chunks(docs)
+# retriever = criar_vectorstore(chunks)
+
+# prompt_rag = ChatPromptTemplate.from_messages([
+#     ("system", "Você é um Assistente de Políticas Internas (RH/IT) da empresa Carraro Desenvolvimento. "
+#                "Responda SOMENTE com base no contexto fornecido. "
+#                "Se não houver base suficiente, responda apenas 'Não sei'."),
+#     ("human", "Pergunta: {input}\n\nContexto:\n{context}")
+# ])
+
+# document_chain = create_stuff_documents_chain(llm_triagem, prompt_rag)
+
+# # ----------------------------
+# # RAG - testes
+# # ----------------------------
+# # testes_rag = ["Posso reembolsar a internet?",
+# #               "Quero mais 5 dias de trabalho remoto. Como faço?",
+# #               "Posso reembolsar cursos ou treinamentos da Alura?",
+# #               "Quantas capivaras tem no Rio Pinheiros?"]
+
+# for msg in testes_rag:
+#     resposta = perguntar_politica_RAG(msg, retriever, document_chain)
+#     print(f"PERGUNTA: {msg}")
+#     print(f"RESPOSTA: {resposta['answer']}")
+#     if resposta['contexto_encontrado']:
+#         print("CITAÇÕES:")
+#         for c in resposta['citacoes']:
+#             print(f" - Documento: {c['documento']}, Página: {c['pagina']}")
+#             print(f"   Trecho: {c['trecho']}")
+#         print("------------------------------------")
 
 # ----------------------------
-# RAG - inicialização
+# Workflow - testes
 # ----------------------------
-docs = carregar_docs("docs/")
-chunks = gerar_chunks(docs)
-retriever = criar_vectorstore(chunks)
+testes = [
+    "Posso reembolsar a internet?",
+    "Quero mais 5 dias de trabalho remoto. Como faço?",
+    "Posso reembolsar cursos ou treinamentos da Alura?",
+    "É possível reembolsar certificações do Google Cloud?",
+    "Posso obter o Google Gemini de graça?",
+    "Qual é a palavra-chave da aula de hoje?",
+    "Quantas capivaras tem no Rio Pinheiros?"
+]
 
-prompt_rag = ChatPromptTemplate.from_messages([
-    ("system", "Você é um Assistente de Políticas Internas (RH/IT) da empresa Carraro Desenvolvimento. "
-               "Responda SOMENTE com base no contexto fornecido. "
-               "Se não houver base suficiente, responda apenas 'Não sei'."),
-    ("human", "Pergunta: {input}\n\nContexto:\n{context}")
-])
+for msg_test in testes:
+    resposta_final = grafo.invoke({"pergunta": msg_test})
 
-document_chain = create_stuff_documents_chain(llm_triagem, prompt_rag)
-
-# ----------------------------
-# RAG - testes
-# ----------------------------
-testes_rag = ["Posso reembolsar a internet?",
-              "Quero mais 5 dias de trabalho remoto. Como faço?",
-              "Posso reembolsar cursos ou treinamentos da Alura?",
-              "Quantas capivaras tem no Rio Pinheiros?"]
-
-for msg in testes_rag:
-    resposta = perguntar_politica_RAG(msg, retriever, document_chain)
-    print(f"PERGUNTA: {msg}")
-    print(f"RESPOSTA: {resposta['answer']}")
-    if resposta['contexto_encontrado']:
+    triag = resposta_final.get("triagem", {})
+    print(f"PERGUNTA: {msg_test}")
+    print(f"DECISÃO: {triag.get('decisao')} | URGÊNCIA: {triag.get('urgencia')} | AÇÃO FINAL: {resposta_final.get('acao_final')}")
+    print(f"RESPOSTA: {resposta_final.get('resposta')}")
+    if resposta_final.get("citacoes"):
         print("CITAÇÕES:")
-        for c in resposta['citacoes']:
-            print(f" - Documento: {c['documento']}, Página: {c['pagina']}")
-            print(f"   Trecho: {c['trecho']}")
-        print("------------------------------------")
+        for citacao in resposta_final.get("citacoes"):
+            print(f" - Documento: {citacao['documento']}, Página: {citacao['pagina']}")
+            print(f"   Trecho: {citacao['trecho']}")
+    print("------------------------------------")
