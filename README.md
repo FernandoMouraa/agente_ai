@@ -10,11 +10,11 @@ Descrição breve do projeto.
 ## Instalação
 ```bash
 # Clone o repositório
-git clone https://github.com/seu-usuario/seu-projeto.git
+https://github.com/FernandoMouraa/agente_ai.git
 
 # Entre na pasta do projeto
 cd seu-projeto
 
 # Instale as dependências
 npm install
-# Cria-o_agente_ia
+
