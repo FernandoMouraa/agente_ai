@@ -1,0 +1,6 @@
+#pip install -r requirements.txt
+langchain
+langchain-google-genai
+python-dotenv
+pydantic
+typing
